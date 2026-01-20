@@ -1,11 +1,7 @@
+`npm run dev`로 실행
 
-  # Code Market Wireframe
+`git clone https://github.com/39CoastalGuard/mini_02_temp.git` 후
 
-  This is a code bundle for Code Market Wireframe. The original project is available at https://www.figma.com/design/IsSvQtQLAIOXH4Jy5mthpS/Code-Market-Wireframe.
+`git branch` -c 원하는이름    으로 브랜치 생성 (-c 안붙이면 생성만 하고 전환안됨)
 
-  ## Running the code
-
-  Run `npm i` to install the dependencies.
-
-  Run `npm run dev` to start the development server.
-  
+실행전 `npm install` 진행
