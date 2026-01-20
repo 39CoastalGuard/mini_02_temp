@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { CodeList } from './components/CodeList';
-import { CodeForm } from './components/CodeForm';
+import { useState } from "react";
+import { CodeList } from "./components/CodeList";
+import { CodeForm } from "./components/CodeForm";
 
 export interface CodePost {
   id: number;
@@ -13,7 +13,17 @@ export interface CodePost {
 }
 
 export default function App() {
-  const [posts, setPosts] = useState<CodePost[]>([]);
+  const [posts, setPosts] = useState<CodePost[]>([
+    {
+      id: 1,
+      title: "React 투두리스트 컴포넌트",
+      price: 15000,
+      code: "function TodoList() {\n const [todos, setTodos] = useState([]);\n return <div>...</div>\n}",
+      description: "깔끔한 투두리스트 컴포넌트입니다",
+      language: "JavaScript",
+      createdAt: "2시간 전",
+    },
+  ]);
 
   const [selectedPost, setSelectedPost] = useState<CodePost | null>(posts[0]);
   const [showForm, setShowForm] = useState(false);
@@ -23,37 +33,35 @@ export default function App() {
     setSelectedPost(post);
   };
 
-  const handleAddPost = (newPost: Omit<CodePost, 'id' | 'createdAt'>) => {
+  const handleAddPost = (newPost: Omit<CodePost, "id" | "createdAt">) => {
     const post: CodePost = {
       ...newPost,
-      id: Math.max(...posts.map(p => p.id)) + 1,
-      createdAt: '방금 전'
+      id: Math.max(...posts.map((p) => p.id)) + 1,
+      createdAt: "방금 전",
     };
     setPosts([post, ...posts]);
     setSelectedPost(post);
     setShowForm(false);
   };
 
-  const handleEditPost = (
-  updatedPost: Omit<CodePost, 'id' | 'createdAt'>
-) => {
-  if (!selectedPost) return;
+  const handleEditPost = (updatedPost: Omit<CodePost, "id" | "createdAt">) => {
+    if (!selectedPost) return;
 
-  const post: CodePost = {
-    ...updatedPost,
-    id: selectedPost.id,
-    createdAt: selectedPost.createdAt,
+    const post: CodePost = {
+      ...updatedPost,
+      id: selectedPost.id,
+      createdAt: selectedPost.createdAt,
+    };
+
+    setPosts(posts.map((p) => (p.id === post.id ? post : p)));
+    setSelectedPost(post);
+    setShowForm(false);
+    setEditMode(false);
   };
-
-  setPosts(posts.map(p => (p.id === post.id ? post : p)));
-  setSelectedPost(post);
-  setShowForm(false);
-  setEditMode(false);
-};
 
   const handleDeletePost = () => {
     if (!selectedPost) return;
-    setPosts(posts.filter(p => p.id !== selectedPost.id));
+    setPosts(posts.filter((p) => p.id !== selectedPost.id));
     setSelectedPost(null);
     window.alert(`"${selectedPost.title}"가 삭제되었습니다 🗑️`);
   };
@@ -72,7 +80,9 @@ export default function App() {
           <div className="flex items-center gap-3">
             <div className="text-2xl">💻</div>
             <h1 className="text-xl text-white font-mono">코드 마켓</h1>
-            <span className="text-sm text-gray-500 ml-2">- 개발자들의 코드 거래소</span>
+            <span className="text-sm text-gray-500 ml-2">
+              - 개발자들의 코드 거래소
+            </span>
           </div>
           <button
             onClick={() => {
@@ -108,7 +118,9 @@ export default function App() {
           {selectedPost ? (
             <div className="flex-1 flex flex-col">
               <div className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-3 flex items-center justify-between">
-                <h2 className="text-lg font-mono text-white">{selectedPost.title}</h2>
+                <h2 className="text-lg font-mono text-white">
+                  {selectedPost.title}
+                </h2>
                 <button
                   onClick={() => setSelectedPost(null)}
                   className="text-gray-400 hover:text-white px-3 py-1 rounded hover:bg-[#3e3e42]"
@@ -124,19 +136,25 @@ export default function App() {
                       <div className="text-3xl font-mono text-[#4ec9b0]">
                         {selectedPost.price.toLocaleString()}원
                       </div>
-                      <div className="text-sm text-gray-500">{selectedPost.createdAt}</div>
+                      <div className="text-sm text-gray-500">
+                        {selectedPost.createdAt}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="px-3 py-1 bg-[#3e3e42] rounded text-sm font-mono">
                         {selectedPost.language}
                       </span>
                     </div>
-                    <p className="text-gray-300 mt-4">{selectedPost.description}</p>
+                    <p className="text-gray-300 mt-4">
+                      {selectedPost.description}
+                    </p>
                   </div>
 
                   {/* 코드 블록 */}
                   <div className="mb-4">
-                    <div className="text-sm text-gray-500 mb-2 font-mono">코드 미리보기:</div>
+                    <div className="text-sm text-gray-500 mb-2 font-mono">
+                      코드 미리보기:
+                    </div>
                     <div className="bg-[#1e1e1e] rounded-lg border border-[#3e3e42] overflow-hidden">
                       <div className="bg-[#2d2d30] px-4 py-2 border-b border-[#3e3e42] text-xs text-gray-400 font-mono">
                         {selectedPost.language.toLowerCase()}.code
