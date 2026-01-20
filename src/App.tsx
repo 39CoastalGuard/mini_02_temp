@@ -13,83 +13,11 @@ export interface CodePost {
 }
 
 export default function App() {
-  const [posts, setPosts] = useState<CodePost[]>([
-    {
-      id: 1,
-      title: 'React 투두리스트 컴포넌트',
-      price: 15000,
-      code: 'function TodoList() {\n  const [todos, setTodos] = useState([]);\n  return <div>...</div>\n}',
-      description: '깔끔한 투두리스트 컴포넌트입니다',
-      language: 'JavaScript',
-      createdAt: '2시간 전'
-    },
-    {
-      id: 2,
-      title: 'Python 웹 스크래퍼',
-      price: 25000,
-      code: 'import requests\nfrom bs4 import BeautifulSoup\n\ndef scrape_data():\n    ...',
-      description: '효율적인 웹 스크래핑 코드',
-      language: 'Python',
-      createdAt: '5시간 전'
-    },
-    {
-      id: 3,
-      title: 'CSS 애니메이션 모음',
-      price: 10000,
-      code: '@keyframes fadeIn {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}',
-      description: '다양한 CSS 애니메이션 효과',
-      language: 'CSS',
-      createdAt: '1일 전'
-    },
-    {
-      id: 4,
-      title: 'Node.js Express API 템플릿',
-      price: 35000,
-      code: 'const express = require("express");\nconst app = express();\n\napp.get("/api/data", (req, res) => {\n  res.json({ message: "Hello" });\n});',
-      description: 'RESTful API 기본 구조',
-      language: 'JavaScript',
-      createdAt: '3일 전'
-    },
-    {
-      id: 5,
-      title: 'SQL 데이터베이스 스키마',
-      price: 20000,
-      code: 'CREATE TABLE users (\n  id INT PRIMARY KEY,\n  username VARCHAR(50),\n  email VARCHAR(100)\n);',
-      description: '사용자 관리 DB 스키마',
-      language: 'SQL',
-      createdAt: '5일 전'
-    },
-    {
-      id: 6,
-      title: 'Java 싱글톤 패턴',
-      price: 12000,
-      code: 'public class Singleton {\n  private static Singleton instance;\n  private Singleton() {}\n  public static Singleton getInstance() {...}\n}',
-      description: '디자인 패턴 구현 예제',
-      language: 'Java',
-      createdAt: '1주일 전'
-    },
-    {
-      id: 7,
-      title: 'TypeScript 유틸리티 함수 모음',
-      price: 18000,
-      code: 'export const debounce = <T extends (...args: any[]) => any>(\n  func: T,\n  wait: number\n) => {...}',
-      description: '자주 사용하는 유틸리티 함수들',
-      language: 'TypeScript',
-      createdAt: '1주일 전'
-    },
-    {
-      id: 8,
-      title: 'React Custom Hook - useLocalStorage',
-      price: 15000,
-      code: 'function useLocalStorage(key, initialValue) {\n  const [value, setValue] = useState(() => {\n    const item = localStorage.getItem(key);\n    return item ? JSON.parse(item) : initialValue;\n  });\n  ...\n}',
-      description: '로컬 스토리지 관리 훅',
-      language: 'JavaScript',
-      createdAt: '2주일 전'
-    }
-  ]);
+  const [posts, setPosts] = useState<CodePost[]>([]);
 
   const [selectedPost, setSelectedPost] = useState<CodePost | null>(posts[0]);
   const [showForm, setShowForm] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   const handleSelectPost = (post: CodePost) => {
     setSelectedPost(post);
@@ -104,6 +32,30 @@ export default function App() {
     setPosts([post, ...posts]);
     setSelectedPost(post);
     setShowForm(false);
+  };
+
+  const handleEditPost = (
+  updatedPost: Omit<CodePost, 'id' | 'createdAt'>
+) => {
+  if (!selectedPost) return;
+
+  const post: CodePost = {
+    ...updatedPost,
+    id: selectedPost.id,
+    createdAt: selectedPost.createdAt,
+  };
+
+  setPosts(posts.map(p => (p.id === post.id ? post : p)));
+  setSelectedPost(post);
+  setShowForm(false);
+  setEditMode(false);
+};
+
+  const handleDeletePost = () => {
+    if (!selectedPost) return;
+    setPosts(posts.filter(p => p.id !== selectedPost.id));
+    setSelectedPost(null);
+    window.alert(`"${selectedPost.title}"가 삭제되었습니다 🗑️`);
   };
 
   const handleBuy = () => {
@@ -122,8 +74,11 @@ export default function App() {
             <h1 className="text-xl text-white font-mono">코드 마켓</h1>
             <span className="text-sm text-gray-500 ml-2">- 개발자들의 코드 거래소</span>
           </div>
-          <button 
-            onClick={() => setShowForm(true)}
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setEditMode(false);
+            }}
             className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-4 py-2 rounded font-mono transition-colors flex items-center gap-2"
           >
             <span>➕</span>
@@ -140,8 +95,8 @@ export default function App() {
             <h2 className="text-sm font-mono text-gray-400">📋 코드 목록</h2>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <CodeList 
-              posts={posts} 
+            <CodeList
+              posts={posts}
               onSelectPost={handleSelectPost}
               selectedPostId={selectedPost?.id || null}
             />
@@ -154,7 +109,7 @@ export default function App() {
             <div className="flex-1 flex flex-col">
               <div className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-3 flex items-center justify-between">
                 <h2 className="text-lg font-mono text-white">{selectedPost.title}</h2>
-                <button 
+                <button
                   onClick={() => setSelectedPost(null)}
                   className="text-gray-400 hover:text-white px-3 py-1 rounded hover:bg-[#3e3e42]"
                 >
@@ -194,13 +149,30 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* 구매 버튼 */}
-                  <button 
-                    onClick={handleBuy}
-                    className="w-full bg-[#0e639c] hover:bg-[#1177bb] text-white py-3 rounded-lg font-mono transition-colors"
-                  >
-                    구매하기
-                  </button>
+                  {/* 버튼들 */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleBuy}
+                      className="flex-1 bg-[#0e639c] hover:bg-[#1177bb] text-white py-3 rounded-lg font-mono transition-colors"
+                    >
+                      구매하기
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowForm(true);
+                        setEditMode(true);
+                      }}
+                      className="bg-[#3e3e42] hover:bg-[#555] text-white px-4 py-3 rounded-lg font-mono"
+                    >
+                      수정하기
+                    </button>
+                    <button
+                      onClick={handleDeletePost}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-mono"
+                    >
+                      삭제하기
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -218,11 +190,15 @@ export default function App() {
         <div>VSCode Market Theme</div>
       </footer>
 
-      {/* 코드 올리기 폼 모달 */}
+      {/* 코드 올리기/수정 폼 모달 */}
       {showForm && (
-        <CodeForm 
-          onClose={() => setShowForm(false)}
-          onSubmit={handleAddPost}
+        <CodeForm
+          onClose={() => {
+            setShowForm(false);
+            setEditMode(false);
+          }}
+          onSubmit={editMode ? handleEditPost : handleAddPost}
+          initialData={editMode ? selectedPost : undefined}
         />
       )}
     </div>

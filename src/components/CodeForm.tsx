@@ -4,18 +4,19 @@ import type { CodePost } from '../App';
 interface CodeFormProps {
   onClose: () => void;
   onSubmit: (post: Omit<CodePost, 'id' | 'createdAt'>) => void;
+  initialData?: CodePost | null; // ✅ 수정 모드 지원
 }
 
-export function CodeForm({ onClose, onSubmit }: CodeFormProps) {
-  const [title, setTitle] = useState('');
-  const [price, setPrice] = useState('');
-  const [code, setCode] = useState('');
-  const [description, setDescription] = useState('');
-  const [language, setLanguage] = useState('JavaScript');
+export function CodeForm({ onClose, onSubmit, initialData }: CodeFormProps) {
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [price, setPrice] = useState(initialData?.price?.toString() || '');
+  const [code, setCode] = useState(initialData?.code || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [language, setLanguage] = useState(initialData?.language || 'JavaScript');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title || !price || !code || !description) {
       alert('모든 필드를 입력해주세요.');
       return;
@@ -26,7 +27,7 @@ export function CodeForm({ onClose, onSubmit }: CodeFormProps) {
       price: parseInt(price),
       code,
       description,
-      language
+      language,
     });
   };
 
@@ -35,8 +36,10 @@ export function CodeForm({ onClose, onSubmit }: CodeFormProps) {
       <div className="bg-[#252526] border border-[#3e3e42] rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
         {/* 헤더 */}
         <div className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-3 flex items-center justify-between sticky top-0">
-          <h2 className="text-lg font-mono text-white">코드 올리기</h2>
-          <button 
+          <h2 className="text-lg font-mono text-white">
+            {initialData ? '코드 수정하기' : '코드 올리기'}
+          </h2>
+          <button
             onClick={onClose}
             className="text-gray-400 hover:text-white px-3 py-1 rounded hover:bg-[#3e3e42]"
           >
@@ -138,7 +141,7 @@ export function CodeForm({ onClose, onSubmit }: CodeFormProps) {
               type="submit"
               className="flex-1 bg-[#0e639c] hover:bg-[#1177bb] text-white px-4 py-2 rounded font-mono transition-colors"
             >
-              등록하기
+              {initialData ? '수정 완료' : '등록하기'}
             </button>
           </div>
         </form>
