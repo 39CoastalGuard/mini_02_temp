@@ -60,19 +60,18 @@ export default function App() {
   };
 
   const handleDeletePost = () => {
-  if (!selectedPost) return;
+    if (!selectedPost) return;
 
-  const ok = window.confirm(
-    `"${selectedPost.title}"를 정말 삭제하시겠습니까?`
-  );
+    const ok = window.confirm(
+      `"${selectedPost.title}"를 정말 삭제하시겠습니까?`,
+    );
 
-  if (!ok) return; // 취소 누르면 종료
+    if (!ok) return; // 취소 누르면 종료
 
-  setPosts(posts.filter((p) => p.id !== selectedPost.id));
-  setSelectedPost(null);
-  window.alert(`"${selectedPost.title}"가 삭제되었습니다 🗑️`);
-};
-
+    setPosts(posts.filter((p) => p.id !== selectedPost.id));
+    setSelectedPost(null);
+    window.alert(`"${selectedPost.title}"가 삭제되었습니다 🗑️`);
+  };
 
   const handleBuy = () => {
     if (selectedPost) {
