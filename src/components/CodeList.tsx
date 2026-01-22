@@ -9,7 +9,7 @@ interface CodeListProps {
 
 export function CodeList({ posts, onSelectPost, selectedPostId }: CodeListProps) {
   return (
-    <div className="divide-y divide-[#3e3e42]">
+    <div className="divide-y divide-[#3e3e42] bg-[#252526] overflow-y-auto h-full">
       {posts.length === 0 ? (
         <div className="p-8 text-center text-gray-500 font-mono text-sm">
           등록된 코드가 없습니다
