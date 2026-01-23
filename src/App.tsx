@@ -61,9 +61,19 @@ export default function App() {
 
   const handleDeletePost = () => {
     if (!selectedPost) return;
-    setPosts(posts.filter((p) => p.id !== selectedPost.id));
-    setSelectedPost(null);
-    window.alert(`"${selectedPost.title}"가 삭제되었습니다 🗑️`);
+
+    // 1. 사용자에게 먼저 물어봅니다.
+    const isConfirmed = window.confirm(
+      `"${selectedPost.title}"를 정말로 삭제하시겠습니까?`,
+    );
+
+    // 2. 사용자가 '확인'을 눌렀을 때만 삭제 로직을 실행합니다.
+    if (isConfirmed) {
+      setPosts(posts.filter((p) => p.id !== selectedPost.id));
+      setSelectedPost(null);
+      window.alert(`"${selectedPost.title}"가 삭제되었습니다 🗑️`);
+    }
+    // '취소'를 누르면 아무 일도 일어나지 않고 함수가 종료됩니다.
   };
 
   const handleBuy = () => {
@@ -75,28 +85,73 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#1e1e1e] text-gray-300 flex flex-col">
       {/* 헤더 */}
-      <header className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-3">
+      <header className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl">💻</div>
-            <h1 className="text-xl text-white font-mono">코드 마켓</h1>
-            <span className="text-sm text-gray-500 ml-2">
-              - 개발자들의 코드 거래소
-            </span>
-          </div>
+          <header className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-5 shrink-0">
+            <div className="flex items-center justify-between">
+              {/* 웹 이름 */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🌸</span>
+                  <h1 className="text-2xl text-white font-black tracking-tighter">
+                    CodeBloom
+                  </h1>
+                </div>
+
+                {/* 구분선 */}
+                <div className="flex items-center ml-4 gap-4">
+                  <span
+                    className="text-[#4e4e52] opacity-50 select-none mx-5"
+                    style={{
+                      display: "inline-block",
+                      padding: "12px",
+                      fontSize: "12px", // 텍스트보다 작게 설정
+                      transform: "scaleY(0.8)", // 높이를 더 작게 압축
+                      fontWeight: 100,
+                    }}
+                  >
+                    |
+                  </span>
+                  {/* 슬로건: 웹명 바로 오른쪽에 배치 */}
+                  <p
+                    className="font-mono opacity-80 whitespace-nowrap"
+                    style={{
+                      fontSize: "11px",
+                      color: "#ddedff",
+                      letterSpacing: "0.5px",
+                      paddingTop: "4px", // 글자 높낮이 맞추기
+                    }}
+                  >
+                    단순하게 시작하는 코딩 첫걸음
+                  </p>
+                </div>
+              </div>
+            </div>
+          </header>
+          {/* 등록 버튼 */}
           <button
             onClick={() => {
               setShowForm(true);
               setEditMode(false);
             }}
-            className="bg-[#0e639c] hover:bg-[#1177bb] text-white px-4 py-2 rounded font-mono transition-colors flex items-center gap-2"
+            // 1. justify-center: 글자를 정중앙으로
+            // 2. whitespace-nowrap: 글자 잘림 방지
+            className="py-2.5 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-95 flex items-center justify-center gap-2 text-sm shadow-md whitespace-nowrap"
+            style={{
+              backgroundColor: "#0e639c",
+              border: "none",
+              cursor: "pointer",
+              // 👇 px 대신 가로 길이를 직접 숫자로 정해버립니다.
+              width: "135px",
+              // 👇 만약 그래도 안 커지면 아래 속성을 추가해서 주변 간섭을 막습니다.
+              flexShrink: 0,
+            }}
           >
-            <span>➕</span>
-            <span>코드 올리기</span>
+            <span style={{ fontSize: "1.2rem" }}>🌱</span>
+            <span>코드 등록하기</span>
           </button>
         </div>
       </header>
-
       {/* 메인 컨텐츠 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 왼쪽 사이드바 - 목록 */}
@@ -153,17 +208,50 @@ export default function App() {
                   {/* 코드 블록 */}
                   <div className="mb-4">
                     <div className="text-sm text-gray-500 mb-2 font-mono">
-                      코드 미리보기:
+                      코드 미리보기 :
                     </div>
-                    <div className="bg-[#1e1e1e] rounded-lg border border-[#3e3e42] overflow-hidden">
-                      <div className="bg-[#2d2d30] px-4 py-2 border-b border-[#3e3e42] text-xs text-gray-400 font-mono">
-                        {selectedPost.language.toLowerCase()}.code
+
+                    {/* 코드 블록 영역 */}
+                    <div className="bg-[#1e1e1e] rounded-lg border border-[#3e3e42] relative min-h-[200px] overflow-hidden">
+                      <div className="bg-[#2d2d30] px-4 py-2 border-b border-[#3e3e42] text-xs text-gray-400 font-mono flex justify-between">
+                        <span>{selectedPost.language.toLowerCase()}.code</span>
+                        <span className="text-[#b95f93] font-bold">
+                          PREVIEW MODE
+                        </span>
                       </div>
-                      <pre className="p-4 overflow-x-auto">
-                        <code className="text-sm font-mono text-[#ce9178]">
-                          {selectedPost.code}
-                        </code>
-                      </pre>
+
+                      <div className="p-4 relative">
+                        {/* 1. 실제 코드를 상위 4줄만 잘라서 보여줌 */}
+                        <pre className="text-sm font-mono text-[#ce9178] whitespace-pre-wrap select-none opacity-60">
+                          <code>
+                            {selectedPost.code
+                              .split("\n")
+                              .slice(0, 4)
+                              .join("\n")}
+                            {"\n"}
+                            {/* 4줄 이후에 줄바꿈이 더 있다면 ... 표시 */}
+                            {selectedPost.code.split("\n").length > 4 && "..."}
+                          </code>
+                        </pre>
+
+                        {/* 2. 코드 바로 아래를 자연스럽게 덮는 짧은 그라데이션 가림막 */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1e1e1e] via-[#1e1e1e]/80 to-transparent pointer-events-none" />
+                      </div>
+
+                      {/* 3. 결제 안내 배너 (코드 양에 상관없이 박스 하단에 고정) */}
+                      <div className="absolute bottom-0 left-0 right-0 h-32 flex flex-col items-center justify-end pb-6 bg-gradient-to-t from-[#1e1e1e] to-transparent">
+                        <div className="bg-[#1e1e1e]/90 px-6 py-3 rounded-xl border border-[#b95f93]/40 shadow-2xl backdrop-blur-sm flex items-center gap-3">
+                          <span className="text-lg">🔒</span>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-white font-bold">
+                              결제 후 전체 코드를 확인할 수 있습니다.
+                            </span>
+                            {/* <span className="text-[10px] text-gray-500">
+                              구매 전에는 상위 4줄만 미리보기로 제공됩니다.
+                            </span> */}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -171,10 +259,17 @@ export default function App() {
                   <div className="flex gap-3">
                     <button
                       onClick={handleBuy}
-                      className="flex-1 bg-[#0e639c] hover:bg-[#1177bb] text-white py-3 rounded-lg font-mono transition-colors"
+                      // 문구는 그대로 '구매하기', 배경색만 헤더 버튼과 동일하게 변경
+                      className="flex-1 text-white py-3 rounded-lg font-mono transition-all hover:brightness-110 active:scale-95 shadow-md"
+                      style={{
+                        backgroundColor: "#0e639c",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
                     >
                       구매하기
                     </button>
+
                     <button
                       onClick={() => {
                         setShowForm(true);
@@ -184,6 +279,7 @@ export default function App() {
                     >
                       수정하기
                     </button>
+
                     <button
                       onClick={handleDeletePost}
                       className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-mono"
@@ -203,9 +299,17 @@ export default function App() {
       </div>
 
       {/* 푸터 */}
-      <footer className="bg-[#007acc] px-6 py-2 text-sm font-mono text-white flex items-center justify-between">
-        <div>총 {posts.length}개의 코드</div>
-        <div>VSCode Market Theme</div>
+      <footer
+        className="px-6 py-2 text-sm font-mono text-white flex items-center justify-between shadow-[0_-2px_10px_rgba(0,0,0,0.3)]"
+        style={{ backgroundColor: "#0e639c" }} // 버튼과 동일한 핑크색 적용
+      >
+        <div className="flex items-center gap-2">
+          <span className="opacity-80">STATUS</span>
+          <span className="font-bold">총 {posts.length}개의 코드</span>
+        </div>
+        <div className="flex items-center gap-2 opacity-80">
+          <span>CodeBloom Market v1.0</span>
+        </div>
       </footer>
 
       {/* 코드 올리기/수정 폼 모달 */}
