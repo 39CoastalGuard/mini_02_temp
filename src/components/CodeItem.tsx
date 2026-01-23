@@ -7,6 +7,8 @@ interface CodeItemProps {
 }
 
 export function CodeItem({ post, onSelectPost, isSelected }: CodeItemProps) {
+  const isSoldOut = !!post.isSoldOut;
+
   return (
     <div
       onClick={() => onSelectPost(post)}
@@ -16,28 +18,34 @@ export function CodeItem({ post, onSelectPost, isSelected }: CodeItemProps) {
           : "hover:bg-[#2a2d2e] border-l-4 border-transparent"
       }`}
     >
+      {/* 구매완료 배지 - 글자 크기에 딱 맞는 작은 회색 네모 */}
+      {isSoldOut && (
+        <div className="absolute top-4 right-4 bg-[#3e3e42] border border-[#4d4d50] rounded-sm px-1 z-10">
+          <span className="text-[#aaaaaa] text-[10px] font-bold leading-tight">
+            구매 완료한 코드
+          </span>
+        </div>
+      )}
+
       {/* 제목 */}
       <h3 className="text-white font-mono mb-2 truncate">{post.title}</h3>
 
-      {/* 설명 */}
+      {/* 설명 (description이 있을 경우) */}
       {post.description && (
-        <p className="text-sm text-gray-400 mb-3 line-clamp-2">
+        <p className={`text-sm mb-3 line-clamp-2 ${isSoldOut ? 'text-gray-800' : 'text-gray-400'}`}>
           {post.description}
         </p>
       )}
 
-      {/* 하단 정보 */}
+      {/* 하단 정보 (언어, 가격 등) */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-1 bg-[#3e3e42] rounded text-xs font-mono text-gray-300">
+          <span className="px-2 py-1 bg-[#333] rounded text-[10px] text-gray-400 font-mono">
             {post.language}
           </span>
-          <span className="text-xs text-gray-500 font-mono">
-            {post.createdAt}
-          </span>
         </div>
-        <div className="text-[#4ec9b0] font-mono">
-          {post.price.toLocaleString()}원
+        <div className={`font-mono text-sm font-bold ${isSoldOut ? 'text-gray-800' : 'text-[#4ec9b0]'}`}>
+          {isSoldOut ? 'SOLD OUT' : `${post.price.toLocaleString()}원`}
         </div>
       </div>
 

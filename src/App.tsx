@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CodeList } from "./components/CodeList";
 import { CodeForm } from "./components/CodeForm";
 
+// 1. 인터페이스에 isSoldOut 추가
 export interface CodePost {
   id: number;
   title: string;
@@ -10,6 +11,7 @@ export interface CodePost {
   description: string;
   language: string;
   createdAt: string;
+  isSoldOut?: boolean; // 👈 추가
 }
 
 export default function App() {
@@ -22,6 +24,7 @@ export default function App() {
       description: "깔끔한 투두리스트 컴포넌트입니다",
       language: "JavaScript",
       createdAt: "2시간 전",
+      isSoldOut: false, // 👈 기본값
     },
   ]);
 
@@ -36,8 +39,9 @@ export default function App() {
   const handleAddPost = (newPost: Omit<CodePost, "id" | "createdAt">) => {
     const post: CodePost = {
       ...newPost,
-      id: Math.max(...posts.map((p) => p.id)) + 1,
+      id: posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 1,
       createdAt: "방금 전",
+      isSoldOut: false, // 👈 신규 등록 시 판매 중 상태로 고정
     };
     setPosts([post, ...posts]);
     setSelectedPost(post);
@@ -51,6 +55,7 @@ export default function App() {
       ...updatedPost,
       id: selectedPost.id,
       createdAt: selectedPost.createdAt,
+      isSoldOut: selectedPost.isSoldOut, // 기존 상태 유지
     };
 
     setPosts(posts.map((p) => (p.id === post.id ? post : p)));
@@ -76,8 +81,27 @@ export default function App() {
     // '취소'를 누르면 아무 일도 일어나지 않고 함수가 종료됩니다.
   };
 
+  // 2. [핵심 수정] 구매 시 실제 데이터 상태 변경
   const handleBuy = () => {
     if (selectedPost) {
+      if (selectedPost.isSoldOut) {
+        window.alert("이미 구매가 완료된 상품입니다.");
+        return;
+      }
+      
+      const ok = window.confirm(`"${selectedPost.title}"를 구매하시겠습니까?`);
+      if (!ok) return;
+
+      // 전체 목록 업데이트
+      const updatedPosts = posts.map((p) =>
+        p.id === selectedPost.id ? { ...p, isSoldOut: true } : p
+      );
+      
+      setPosts(updatedPosts);
+      
+      // 현재 상세보기 페이지도 업데이트
+      setSelectedPost({ ...selectedPost, isSoldOut: true });
+      
       window.alert(`"${selectedPost.title}" 구매가 완료되었습니다! 🎉`);
     }
   };
@@ -154,7 +178,6 @@ export default function App() {
       </header>
       {/* 메인 컨텐츠 */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 왼쪽 사이드바 - 목록 */}
         <div className="w-96 bg-[#252526] border-r border-[#3e3e42] flex flex-col">
           <div className="p-4 border-b border-[#3e3e42]">
             <h2 className="text-sm font-mono text-gray-400">📋 코드 목록</h2>
@@ -168,41 +191,27 @@ export default function App() {
           </div>
         </div>
 
-        {/* 중앙 - 상세 보기 */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {selectedPost ? (
             <div className="flex-1 flex flex-col">
               <div className="bg-[#2d2d30] border-b border-[#3e3e42] px-6 py-3 flex items-center justify-between">
-                <h2 className="text-lg font-mono text-white">
-                  {selectedPost.title}
-                </h2>
-                <button
-                  onClick={() => setSelectedPost(null)}
-                  className="text-gray-400 hover:text-white px-3 py-1 rounded hover:bg-[#3e3e42]"
-                >
-                  ✕
-                </button>
+                <h2 className="text-lg font-mono text-white">{selectedPost.title}</h2>
+                <button onClick={() => setSelectedPost(null)} className="text-gray-400">✕</button>
               </div>
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="max-w-4xl">
-                  {/* 가격 및 정보 */}
-                  <div className="bg-[#2d2d30] rounded-lg p-6 mb-6 border border-[#3e3e42]">
+                  <div className="bg-[#2d2d30] rounded-lg p-6 mb-6 border border-[#3e3e42] relative">
+                    {/* 상세페이지에도 딱지 추가 */}
+                    {selectedPost.isSoldOut && (
+                      <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded font-bold">SOLD OUT</div>
+                    )}
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-3xl font-mono text-[#4ec9b0]">
-                        {selectedPost.price.toLocaleString()}원
+                        {selectedPost.isSoldOut ? "구매 완료" : `${selectedPost.price.toLocaleString()}원`}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {selectedPost.createdAt}
-                      </div>
+                      <div className="text-sm text-gray-500">{selectedPost.createdAt}</div>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="px-3 py-1 bg-[#3e3e42] rounded text-sm font-mono">
-                        {selectedPost.language}
-                      </span>
-                    </div>
-                    <p className="text-gray-300 mt-4">
-                      {selectedPost.description}
-                    </p>
+                    <p className="text-gray-300 mt-4">{selectedPost.description}</p>
                   </div>
 
                   {/* 코드 블록 */}
@@ -255,7 +264,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* 버튼들 */}
                   <div className="flex gap-3">
                     <button
                       onClick={handleBuy}
@@ -286,14 +294,14 @@ export default function App() {
                     >
                       삭제하기
                     </button>
+                    <button onClick={() => { setShowForm(true); setEditMode(true); }} className="bg-[#3e3e42] text-white px-4 py-3 rounded-lg">수정</button>
+                    <button onClick={handleDeletePost} className="bg-red-600 text-white px-4 py-3 rounded-lg">삭제</button>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500 font-mono">
-              코드를 선택해주세요
-            </div>
+            <div className="flex-1 flex items-center justify-center text-gray-500 font-mono">코드를 선택해주세요</div>
           )}
         </div>
       </div>
@@ -311,16 +319,11 @@ export default function App() {
           <span>CodeBloom Market v1.0</span>
         </div>
       </footer>
-
-      {/* 코드 올리기/수정 폼 모달 */}
       {showForm && (
         <CodeForm
-          onClose={() => {
-            setShowForm(false);
-            setEditMode(false);
-          }}
+          onClose={() => { setShowForm(false); setEditMode(false); }}
           onSubmit={editMode ? handleEditPost : handleAddPost}
-          initialData={editMode ? selectedPost : undefined}
+          initialData={editMode ? (selectedPost as any) : undefined}
         />
       )}
     </div>
